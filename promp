@@ -1,0 +1,102 @@
+You are a senior frontend architect and UX auditor. I'm redesigning the UI/UX of
+our customer interaction portal and need a complete, factual audit of the CURRENT
+frontend so a world-class UI/UX designer can redesign it without seeing the code.
+
+RULES
+- Do NOT modify any code. Read-only analysis.
+- Do NOT guess or invent. If something can't be determined from the code, write "UNKNOWN".
+- Be specific: use real file paths, component names, route names, and actual values.
+- Output ONE markdown document using exactly the sections below.
+
+---
+## 0. PRODUCT & DOMAIN CONTEXT (infer from README, docs, models, API names, copy, comments)
+- What this portal is for, in plain language (2-3 sentences)
+- The business domain/industry it serves
+- Core entities/objects in the system (e.g. Customer, Ticket, Order, Invoice, Project)
+  and how they relate to each other
+- Main features/modules and what each does
+- Main user journeys, from the user's goal to the outcome
+- Integrations (CRM, payment, email/SMS, WhatsApp, third-party APIs)
+- Any terminology/jargon the UI uses that a new user might not understand
+- Anything in the code, docs, or comments that hints at business rules,
+  SLAs, statuses/workflows (e.g. Open → In Progress → Resolved), or permissions
+Mark anything you can't confirm as "UNKNOWN".
+
+## 1. TECH STACK
+- Framework + version (React/Next/Vue/Angular/etc.), language (JS/TS)
+- Styling approach (Tailwind, CSS modules, styled-components, SCSS, plain CSS, mixed?)
+- UI library, if any (MUI, AntD, Bootstrap, shadcn, Chakra...) + version
+- State management, routing, form library, data fetching, i18n, charting libs
+- Build tool, and any CSS/JS conventions or linters enforced
+
+## 2. PROJECT STRUCTURE
+- Folder tree (top 3 levels) for the frontend
+- Where pages, components, styles, assets, and API calls live
+
+## 3. SITEMAP / ROUTES
+For EVERY route/page, give a table:
+| Route | Page/file | Purpose | Auth required? | Roles allowed |
+
+## 4. USER ROLES & FLOWS
+- All user roles in the system (customer, agent, admin, etc.) and what each can see/do
+- Step-by-step main flows as implemented (e.g. login → dashboard → raise ticket →
+  chat → track status). List the screens and actions in order.
+
+## 5. PAGE-BY-PAGE BREAKDOWN
+For EACH page/screen:
+- Purpose and what the user is trying to achieve
+- Layout structure (header, sidebar, tabs, cards, tables, modals, etc.)
+- Every component used on it
+- Every data field shown (labels, types, example values)
+- Every action available (buttons, links, forms, filters, search, sort, pagination, bulk actions)
+- Empty, loading, error, and success states (are they handled? how?)
+- API endpoints it calls (method, path, request/response shape)
+
+## 6. COMPONENT INVENTORY
+- List all reusable components: name, path, props, where used, and variants
+- Flag duplicates / near-duplicates / inconsistent versions of the same thing
+  (e.g. 4 different button styles)
+
+## 7. CURRENT DESIGN SYSTEM (AS-IS)
+- Colors: every hex/rgb/CSS variable actually in use, grouped by usage
+  (primary, text, background, borders, status colors) + count of one-off hardcoded colors
+- Typography: font families, sizes, weights, line-heights actually used
+- Spacing, border radius, shadows, breakpoints
+- Icons (library or custom), logos, images, brand assets and their file paths
+- Dark mode support? Theming setup?
+
+## 8. FORMS & INTERACTIONS
+- Every form: fields, input types, validation rules, error messages, submit behavior
+- Modals, drawers, toasts, tooltips, confirmations
+- Real-time features (chat, notifications, websockets, polling)
+- File uploads, attachments, downloads
+
+## 9. RESPONSIVENESS & ACCESSIBILITY
+- How responsive is it? Which breakpoints exist? Which pages break on mobile?
+- Accessibility problems you can detect: missing alt/labels, contrast issues,
+  keyboard navigation, focus states, ARIA misuse, semantic HTML problems
+
+## 10. PERFORMANCE & TECHNICAL DEBT
+- Heavy components/pages, unnecessary re-renders, large bundles, unoptimized images
+- Inline styles, !important usage, dead CSS, copy-pasted code, inconsistent patterns
+- Anything that would make a UI redesign hard (tight coupling of logic and markup,
+  global CSS collisions, etc.)
+
+## 11. UX PROBLEMS YOU CAN SPOT FROM THE CODE
+List concrete issues: confusing navigation, too many steps, unclear labels,
+inconsistent patterns, missing feedback, cluttered screens, missing states.
+For each: where it is + why it's a problem.
+
+## 12. CONSTRAINTS
+- What must NOT change (API contracts, auth flow, required fields, legal text, integrations)
+- Third-party widgets/embeds (payment, chat, analytics, maps)
+- Browser support requirements, if any are configured
+
+## 13. KEY CODE SAMPLES
+Paste the full code of: (a) the main layout/shell component, (b) the dashboard or
+home page, (c) one representative form, (d) one representative table/list,
+(e) the global stylesheet / theme / tailwind config.
+
+## 14. SCREENSHOT CHECKLIST
+List every page/state I should screenshot for the designer (e.g. login, dashboard,
+ticket list, ticket detail, empty state, error state, mobile views).
