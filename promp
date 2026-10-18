@@ -1,102 +1,452 @@
-You are a senior frontend architect and UX auditor. I'm redesigning the UI/UX of
-our customer interaction portal and need a complete, factual audit of the CURRENT
-frontend so a world-class UI/UX designer can redesign it without seeing the code.
+# CII Redesign Spec — HHFL Customer Interaction Intelligence
 
-RULES
-- Do NOT modify any code. Read-only analysis.
-- Do NOT guess or invent. If something can't be determined from the code, write "UNKNOWN".
-- Be specific: use real file paths, component names, route names, and actual values.
-- Output ONE markdown document using exactly the sections below.
+> For the AI coding agent. READ THIS WHOLE FILE before changing anything.
+> Put it in the repo root. Work through the TASKS in section 6, one at a time,
+> and STOP after each task.
 
 ---
-## 0. PRODUCT & DOMAIN CONTEXT (infer from README, docs, models, API names, copy, comments)
-- What this portal is for, in plain language (2-3 sentences)
-- The business domain/industry it serves
-- Core entities/objects in the system (e.g. Customer, Ticket, Order, Invoice, Project)
-  and how they relate to each other
-- Main features/modules and what each does
-- Main user journeys, from the user's goal to the outcome
-- Integrations (CRM, payment, email/SMS, WhatsApp, third-party APIs)
-- Any terminology/jargon the UI uses that a new user might not understand
-- Anything in the code, docs, or comments that hints at business rules,
-  SLAs, statuses/workflows (e.g. Open → In Progress → Resolved), or permissions
-Mark anything you can't confirm as "UNKNOWN".
 
-## 1. TECH STACK
-- Framework + version (React/Next/Vue/Angular/etc.), language (JS/TS)
-- Styling approach (Tailwind, CSS modules, styled-components, SCSS, plain CSS, mixed?)
-- UI library, if any (MUI, AntD, Bootstrap, shadcn, Chakra...) + version
-- State management, routing, form library, data fetching, i18n, charting libs
-- Build tool, and any CSS/JS conventions or linters enforced
+## 1. Goal and scope
 
-## 2. PROJECT STRUCTURE
-- Folder tree (top 3 levels) for the frontend
-- Where pages, components, styles, assets, and API calls live
+Hero Housing Finance (HHFL) is an NBFC (home loans, LAP). The **Customer Interaction
+Intelligence (CII)** portal is used by company officials (collections, customer care,
+management) on **laptops** to monitor customer calls, collections calls and emails and
+their AI analysis. English only.
 
-## 3. SITEMAP / ROUTES
-For EVERY route/page, give a table:
-| Route | Page/file | Purpose | Auth required? | Roles allowed |
+The current UI looks unprofessional (pastel gradients, giant hero banners, centered
+text everywhere, tiny low-contrast labels, raw UUIDs, fake `0/100` gauges, overlapping
+cards, 4-5 table rows visible per screen). We are doing a **complete visual redesign**
+so it feels professional, modern, calm and trustworthy, like enterprise banking software.
 
-## 4. USER ROLES & FLOWS
-- All user roles in the system (customer, agent, admin, etc.) and what each can see/do
-- Step-by-step main flows as implemented (e.g. login → dashboard → raise ticket →
-  chat → track status). List the screens and actions in order.
+**This is a UI-ONLY change.** Features, flows, routes, data, labels and the backend are
+finalised and must not change.
 
-## 5. PAGE-BY-PAGE BREAKDOWN
-For EACH page/screen:
-- Purpose and what the user is trying to achieve
-- Layout structure (header, sidebar, tabs, cards, tables, modals, etc.)
-- Every component used on it
-- Every data field shown (labels, types, example values)
-- Every action available (buttons, links, forms, filters, search, sort, pagination, bulk actions)
-- Empty, loading, error, and success states (are they handled? how?)
-- API endpoints it calls (method, path, request/response shape)
+### Files you MAY edit
+- `src/components/Header.jsx`
+- `src/pages/CohortPage.jsx`
+- `src/pages/CustomerDashboard.jsx` and `CustomerDashboard.module.css`
+- `src/pages/CustomerLoansPage.jsx`
+- `src/pages/CustomerDetails.jsx` and `CustomerDetails.module.css`
+- `src/pages/CollectionInsights.jsx`
+- `src/pages/EmailAnalysisPage.jsx`
+- `src/pages/EmailAnalysitcsDashboard.jsx`
+- `src/pages/ThreadAnalyticsDashboard.jsx`
+- NEW files under `src/cii/` (all new design-system code goes here)
+- `tailwind.config.js`: ADDITIVE ONLY (new keys under `theme.extend`, prefixed `cii`)
 
-## 6. COMPONENT INVENTORY
-- List all reusable components: name, path, props, where used, and variants
-- Flag duplicates / near-duplicates / inconsistent versions of the same thing
-  (e.g. 4 different button styles)
+### Files you must NEVER edit
+`AIServicesNavBar`, `ServicesDashboard`, `Aadhaar*`, `AccountAggregator`,
+`AccessManagement`, `HeroHousingLogin`, `RequireService`, `src/access/*`, auth files,
+`App.jsx`, `src/pages/services/*` (API clients), `src/lib/*`, `src/index.css`,
+`src/App.css`, `src/ui/*` (shared with other services), `package.json`
+(no new dependencies).
 
-## 7. CURRENT DESIGN SYSTEM (AS-IS)
-- Colors: every hex/rgb/CSS variable actually in use, grouped by usage
-  (primary, text, background, borders, status colors) + count of one-off hardcoded colors
-- Typography: font families, sizes, weights, line-heights actually used
-- Spacing, border radius, shadows, breakpoints
-- Icons (library or custom), logos, images, brand assets and their file paths
-- Dark mode support? Theming setup?
+---
 
-## 8. FORMS & INTERACTIONS
-- Every form: fields, input types, validation rules, error messages, submit behavior
-- Modals, drawers, toasts, tooltips, confirmations
-- Real-time features (chat, notifications, websockets, polling)
-- File uploads, attachments, downloads
+## 2. Hard rules
 
-## 9. RESPONSIVENESS & ACCESSIBILITY
-- How responsive is it? Which breakpoints exist? Which pages break on mobile?
-- Accessibility problems you can detect: missing alt/labels, contrast issues,
-  keyboard navigation, focus states, ARIA misuse, semantic HTML problems
+1. **Presentation only.** You may change JSX markup structure, classNames, styles, and
+   add purely presentational components.
+2. **Do NOT change:** hook logic (`useState/useEffect/useMemo/useCallback`), data
+   fetching, API URLs and params, data mapping/normalising, event-handler logic, props
+   passed between components, navigation targets and query params, filter/sort/
+   pagination logic, Excel export, phone masking, `ptpEngine`/`interactions` helpers,
+   or any label/copy text.
+3. **Nothing disappears.** Every data field currently shown must still be shown. Every
+   button, link, filter, tab, export and drawer must still exist and behave the same.
+   You may regroup, restyle, collapse into an expander, or reorder, but not remove.
+4. **Render-time formatting is allowed** (₹ with Indian grouping, consistent date
+   display). Never mutate the underlying data. Exports must still use raw values.
+5. **Bugs: report, don't fix.** If you find a logic/routing/security bug, add it to
+   `CII_REDESIGN_NOTES.md` (file, line, description) and leave the code alone.
+6. **Isolation.** Every CII page root is wrapped in `<div className="cii-app">`.
+   All new CSS lives in `src/cii/cii.css` (imported only by CII files). Do not edit
+   global CSS and never rely on the root `text-align:center`.
+7. After each task run `npm run lint` and `npm run build`, and show
+   `git diff --name-only`. Any changed file outside section 1's allowed list gets
+   reverted.
+8. If this spec mentions a field that does not exist in the code, ignore it. If the
+   code has fields this spec doesn't mention, KEEP them and place them in the most
+   logical group.
 
-## 10. PERFORMANCE & TECHNICAL DEBT
-- Heavy components/pages, unnecessary re-renders, large bundles, unoptimized images
-- Inline styles, !important usage, dead CSS, copy-pasted code, inconsistent patterns
-- Anything that would make a UI redesign hard (tight coupling of logic and markup,
-  global CSS collisions, etc.)
+---
 
-## 11. UX PROBLEMS YOU CAN SPOT FROM THE CODE
-List concrete issues: confusing navigation, too many steps, unclear labels,
-inconsistent patterns, missing feedback, cluttered screens, missing states.
-For each: where it is + why it's a problem.
+## 3. Design language: "trusted, calm, dense"
 
-## 12. CONSTRAINTS
-- What must NOT change (API contracts, auth flow, required fields, legal text, integrations)
-- Third-party widgets/embeds (payment, chat, analytics, maps)
-- Browser support requirements, if any are configured
+### 3.1 Principles
+1. **Data first.** The first screen shows data, not decoration. No hero banners.
+2. **Quiet UI.** White cards on a light gray page, thin borders, one subtle shadow.
+   Color is reserved for meaning (status, priority, channel) and the primary action.
+3. **Dense but readable.** Built for a 1366×768 laptop minimum.
+4. **Consistent.** One header, one button style, one table style, one chip style, one
+   score scale everywhere.
+5. **Honest.** Real loading, empty and error states. Never show invented or placeholder
+   values.
 
-## 13. KEY CODE SAMPLES
-Paste the full code of: (a) the main layout/shell component, (b) the dashboard or
-home page, (c) one representative form, (d) one representative table/list,
-(e) the global stylesheet / theme / tailwind config.
+### 3.2 Color tokens (define as CSS variables in `cii.css` AND as Tailwind `cii-*` keys)
 
-## 14. SCREENSHOT CHECKLIST
-List every page/state I should screenshot for the designer (e.g. login, dashboard,
-ticket list, ticket detail, empty state, error state, mobile views).
+| Token | Value | Use |
+|---|---|---|
+| `--cii-primary` | `#0B2A5B` | primary buttons, active tab, links, header wordmark |
+| `--cii-primary-hover` | `#143D7A` | hover |
+| `--cii-primary-tint` | `#EEF3FB` | selected row, active list item, info panels |
+| `--cii-brand-red` | `#E2231A` | ONLY the small logo mark. Never for errors. |
+| `--cii-bg` | `#F6F8FB` | page background |
+| `--cii-surface` | `#FFFFFF` | cards, tables, drawers |
+| `--cii-border` | `#E4E8EF` | all borders and dividers |
+| `--cii-text` | `#101828` | primary text |
+| `--cii-text-2` | `#475467` | secondary text |
+| `--cii-text-3` | `#667085` | labels, captions |
+| success | `#067647` on `#ECFDF3` | positive, kept, resolved, pass |
+| warning | `#B54708` on `#FFFAEB` | medium, due, attention |
+| danger | `#B42318` on `#FEF3F2` | high risk, broken, complaint, fail |
+| info | `#175CD3` on `#EFF8FF` | informational |
+| neutral | `#475467` on `#F2F4F7` | default chips |
+| channel: Customer Care | `#175CD3` | channel badges and timeline dots |
+| channel: Collections | `#6941C6` | |
+| channel: Email | `#0E7090` | |
+| channel: WhatsApp | `#067647` | |
+
+**Priority and score scale (use everywhere, identically):**
+P1 / lowest score band = danger. P2 / middle band = warning. P3 / highest band = success
+(or info for neutral states). Use the thresholds the code ALREADY uses. Do not invent
+new thresholds. Wherever a score or priority appears in a list, show a tiny legend or a
+tooltip explaining the colors.
+
+### 3.3 Typography
+- Font stack: `Inter, system-ui, -apple-system, "Segoe UI", sans-serif`.
+- Sizes: 12 (labels, captions, chips), 13 (table body), 14 (body), 16 (card titles),
+  20 (page title), 24 (large KPI numbers). Weights 400, 500, 600 only.
+- Numbers, money, DPD and counts use `font-variant-numeric: tabular-nums`.
+- Field labels: sentence case, 12px, `--cii-text-3`. Do NOT use long all-caps labels.
+  All-caps is allowed only for tiny status chips (11px, letter-spacing .04em).
+- Left-align all text. Right-align numeric table columns. Center only icons, avatars,
+  empty states and gauge numbers.
+
+### 3.4 Shape, spacing, elevation
+- 4px spacing grid (4, 8, 12, 16, 24, 32).
+- Radius: 8px for inputs/buttons/chips-rects, 12px for cards, 999px for pills/avatars.
+- Single shadow: `0 1px 2px rgba(16,24,40,.06)`. Drawers/modals: `0 12px 32px rgba(16,24,40,.18)`.
+- **No** gradients, glassmorphism, blurred backgrounds, emoji, or coin/gold icons.
+- Icons: `lucide-react`, 16px (20px in empty states), stroke 1.75, color `--cii-text-3`
+  unless meaningful. Do not hand-draw SVG icon sets.
+
+### 3.5 Layout and density
+- Design for **1366×768** first; scale up to 1920 with a fluid max-width of 1440px.
+- Sticky header 56px. Page padding 24px (16px under 1024px). Section gap 16px.
+- Page title row: title 20px/600 + one-line muted description (max one line) + actions
+  on the right. NO hero banners, NO big marketing paragraphs.
+- Tables: header row sticky inside its scroll container, 44px body rows (single-line
+  cells, ellipsis + `title` tooltip for overflow), 36px compact variant for very dense
+  tables. Hover row `#F9FAFB`. Selected row `--cii-primary-tint`. Wide tables scroll
+  horizontally inside their own container, never the page.
+- Chips never wrap (`white-space: nowrap`).
+- Cards: white, 1px border, 12px radius, 16px padding, optional title row with a
+  16px/600 title and right-aligned actions.
+
+### 3.6 Components to build in `src/cii/ui/` (presentational only)
+`PageHeader`, `Card`, `KpiTile`, `Button` (primary / secondary / ghost / danger),
+`StatusPill`, `ChannelBadge`, `PriorityChip`, `ScoreBar`, `ScoreRing` (replaces the
+conic-gradient/SVG gauges), `KeyValueGrid`, `Tabs` (underline style, controlled),
+`SegmentedControl`, `FilterBar`, `DataTable` styles, `Drawer` shell (styling only; keep
+each page's existing open/close logic), `Modal` shell, `EmptyState`, `ErrorBanner`,
+`Skeleton`, `CopyableId` (muted small mono text with a copy icon).
+Plus `src/cii/format.js` with pure helpers: `inr(n)` → `₹16,36,029` (en-IN grouping),
+`dateTime(d)` → `13 Oct 2026, 12:09 pm`, `dateOnly(d)` → `13 Oct 2026`, `compact(n)`.
+
+### 3.7 States
+- **Loading:** skeletons shaped like the final content (not spinners over blank pages).
+- **Error:** inline `ErrorBanner` with the message and the page's EXISTING retry handler.
+- **Empty:** `EmptyState` (icon, one line title, one line hint) ONLY when data is
+  genuinely absent (`null`, `undefined`, empty list). Never render `0/100` gauges or rows
+  of `—` as if they were real results when the underlying value is absent. If you can't
+  tell absent from a real zero, leave the code's behavior and log it in the notes file.
+- Raw IDs/UUIDs are never primary text. Show them muted via `CopyableId`.
+
+### 3.8 Accessibility
+Visible focus ring (2px `--cii-primary`, 2px offset). Clickable `<div>`s get
+`role="button"`, `tabIndex={0}` and Enter/Space handlers that call the EXISTING onClick.
+Icon-only buttons need `aria-label`. Text contrast at least 4.5:1. Every table cell
+count matches its header (fix `colSpan` mismatches). Inputs have labels or aria-labels.
+Status is never conveyed by color alone (always text or icon).
+
+---
+
+## 4. Page specifications
+
+Every page: `<div className="cii-app">` → `Header` → `<main>` with the layout below.
+Wireframes show structure, not exact pixels.
+
+### 4.1 Header (`Header.jsx`), used by all CII pages
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ▍HHFL  CII                      Cohorts   Users   Emails                 │ 56px
+└──────────────────────────────────────────────────────────────────────────┘
+```
+White bar, bottom border, sticky. Left: small red square mark + "HHFL" (navy, 600) +
+"CII" (navy, 400). Right: the SAME three links to the SAME routes, as underline tabs;
+the active one has a 2px primary underline and primary text. Keep any existing mobile
+behavior (collapse into a menu under 768px). No new links or buttons.
+
+### 4.2 Cohorts: `CohortPage.jsx`
+Routes: `/customer-cohorts` and the CII dashboard route. Highest-traffic page.
+```
+Customer Interaction Intelligence                        [Reset]
+Cohort strategy by channel, state and time period
+┌ Filter bar ─────────────────────────────────────────────────────────┐
+│ Channel [All ▾]   State [All ▾]   Time period [All ▾]               │
+└─────────────────────────────────────────────────────────────────────┘
+┌ Cohorts (324) ───────┐ ┌ [Customer Drilldown][Cohort Details][Owner & Priority] ┐
+│ ▌Topup Required  144 │ │ #1.3 Topup Required   [High] [Owner: Sales] [Overlap: None]
+│   #1.3 Sales/Growth  │ │ Primary trigger: ...                                    │
+│  Promise to Pay    9 │ │ ┌ Business rule ───────┐ ┌ Recommended action ────────┐ │
+│   #100 Payments/Coll │ │ └──────────────────────┘ └────────────────────────────┘ │
+│  Charges Dispute   4 │ │ [Search customer, city, state, signal...] [All▾][All▾] [Export to Excel]
+│  ...                 │ │ Customer │ Signal │ Score │ Owner │ Next action │ Open │
+└──────────────────────┘ └─────────────────────────────────────────────────────────┘
+```
+- Remove the hero. Page title 20px + one muted line. The filters (Channel, State, Time
+  Period, Reset) sit in ONE row inside a white filter card; labels above inputs,
+  left-aligned, equal widths (replace the fixed `lg:w-[450px]`).
+- Two-pane layout (left 300px rail, right fluid). The rail header shows "Cohorts" and
+  the total customer count. The rail scrolls independently. Each cohort item: **name
+  first** (14px/500), the code + category (`#1.3 · Sales / Growth`) as a small muted
+  caption beneath, and the count as a neutral pill on the right. Selected item: primary
+  tint background + 3px primary left border.
+- Right pane tabs (existing three): underline `Tabs`.
+- Selected-cohort summary: title row (code chip + name), chips for priority / owner /
+  overlap, the primary-trigger line, and the description line. "Business rule" and
+  "Recommended action" are two side-by-side info panels (primary tint and neutral),
+  left-aligned, 13px, each clamped to 3 lines with the existing expand control or a
+  "Show more" toggle.
+- Customer table: columns Customer | Signal | Score | Owner | Next action | Preview.
+  Replace the 12-column grid with a real `<table>` in a horizontal-scroll container.
+  Customer cell: name (13px/600, primary link color), under it phone and channel
+  (muted 12px) and cohort chips. Score cell: `PriorityChip` (P1/P2/P3) next to the
+  number plus a thin `ScoreBar`. Owner: up to 2 neutral chips, "+N" for the rest.
+  Next action: single line, ellipsis, tooltip. "Open" is a ghost/link button.
+- Search + the two existing dropdowns form a toolbar directly above the table; "Export
+  to Excel" is a secondary button right-aligned in that toolbar.
+- QuickCustomerPreview becomes a right-side `Drawer` (or a bottom sheet if it is
+  currently bottom-anchored; keep its existing behavior), with a `KeyValueGrid`.
+
+### 4.3 Users: `CustomerDashboard.jsx` (+ module CSS)
+Route `/dashboard`. (Keep the nav label "Users".)
+```
+Customers                                         [Mask phone numbers ☐] [Export]
+Sentiment overview of customer conversations
+[ Positive  n ] [ Neutral  n ] [ Negative  n ]            (KpiTiles)
+[ Search ............................ ]
+Phone │ Customer name │ Sentiment │ Latest channel │ Description        │
+...                                                          « 1 2 3 »
+```
+- Three KpiTiles from the existing SummaryCards; accent bar color = sentiment color.
+- Search input with a visible `<label>` (visually hidden is fine). Checkbox and Export
+  keep their behavior.
+- Dense table; Sentiment as `StatusPill`; Latest channel as `ChannelBadge`; description
+  single-line + tooltip. Fix the empty-row `colSpan` to equal the real column count.
+- Keep the pagination logic and constant exactly as is; restyle the pager only.
+- Rewrite the CSS module in the new tokens. Remove its old pastel/gray palette.
+
+### 4.4 Loan details: `CustomerLoansPage.jsx`
+Route `/loan-details/:customerId` (and the existing customer-loans route).
+```
+Dashboard / Customer loan details                              [← Back]
+┌ (MS) Mr. Name  [Active customer]   📞 phone   🏦 1 loan ───────────────┐  light card
+└────────────────────────────────────────────────────────────────────────┘
+Loan details                                                    [1 record]
+┌ Loan #1 ───────────────────────────────────────── 0 interactions ─────┐
+│ Loan account number   Outstanding   DPD   Customer ID (muted+copy)      │
+│ Phone number          Address       ...                                 │
+│ ── Interactions on this loan ──   (timeline or empty state)             │
+│                      [Email insights] [Collection insights] [Customer insights]
+└────────────────────────────────────────────────────────────────────────┘
+Account-level interactions                                  [2 unmapped]
+┌ Customer interactions timeline (2)   [Search timeline…] [All channels ▾] ┐
+│ ● Customer care · 10 Aug 2026, 12:09 pm   Interaction        View details › │
+└────────────────────────────────────────────────────────────────────────┘
+```
+- Replace the black hero with a light card: initials avatar (primary tint), name 20px/600,
+  "Active customer" as a success `StatusPill`, phone and loan count as neutral chips.
+- Each loan is a `Card` with a header (Loan #n + interactions count pill) and a
+  `KeyValueGrid` (3 columns on wide screens): label 12px muted, value 14px. Outstanding
+  uses `inr()`. Empty values (`—`) show a muted "Not available". The Customer ID goes in
+  `CopyableId`.
+- The three insight buttons keep their targets, become a right-aligned button group
+  (primary for the main one that is primary today, secondary for the others).
+- Timeline: vertical line with channel-colored dots, each item a bordered row: channel
+  badge, date (`dateTime`), title, "View details ›" link. Keep the search and channel
+  filter in a toolbar above. Empty timeline → `EmptyState`.
+- "Unmapped" pill uses warning styling and a one-line hint under the section title.
+
+### 4.5 Customer insights: `CustomerDetails.jsx` (+ module CSS)
+Route `/customer-insights/:customerId`. Richest page, so preserve everything.
+```
+┌ Individual customer dashboard ──────────────────────────────────────────┐
+│ (M) Mr. Name  phone                       [● Alert: High] [● Priority: High]
+├─────────────────────────────────────────────────────────────────────────┤
+│ Email │ NPA stage │ DPD │ Outstanding │ Product │ Foreclosure demand │ Loan [▾]
+│ Cohorts: [Foreclosure Query]                                            │
+└─────────────────────────────────────────────────────────────────────────┘
+┌ main column ─────────────────────────────┐ ┌ right rail (340px) ─────────┐
+│ Latest interaction intelligence           │ │ Alert card: HIGH            │
+│  summary · complaint yes/no · cohorts     │ │  reasons list               │
+│  preferred channel · call/WhatsApp/email  │ │ Financial metrics           │
+│  counts                                   │ │ Customer health score       │
+│ Emotion & urgency  | CSAT trend (chart)   │ │  score bar + 4 factor chips │
+│ QA report (score + 5 parameters)          │ │ Intent distribution (donut) │
+│ Next actions (numbered)                   │ │                             │
+│ Customer interactions timeline            │ │                             │
+└───────────────────────────────────────────┘ └─────────────────────────────┘
+```
+- Identity card on top: avatar, name 20px/600, phone muted, and the Alert/Priority
+  `StatusPill`s (danger/warning/success by existing value). Under it a responsive grid
+  of 7 info tiles (label 12px muted, value 14px/600); outstanding via `inr()`; the loan
+  account selector keeps its existing logic and sits in the last tile. Cohort chips
+  below.
+- Two columns on ≥1280px (main + 340px right rail), single column below. Right rail is
+  sticky (`top: 72px`) when it fits.
+- Latest interaction intelligence: summary text 14px left-aligned, max-width ~70ch.
+  Complaint yes/no as a pill, counts (Audio calls / WhatsApp / Emails) as three small
+  tiles.
+- Emotion bars: label, percent, 6px bar in channel/semantic colors. CSAT trend:
+  keep the existing chart component and data, restyle line/axis/tooltip with tokens.
+- QA report: left score tile (navy, big number /100), right five rows (label, bar,
+  value, Pass/Fail `StatusPill`). Each row aligned in a grid so values line up.
+- Alert card: danger-tint card, bullet list at 13px; keep every bullet.
+- Health score: number + `ScoreBar` + four factor chips (CSAT, Sentiment, DPD,
+  Complaints) colored by their existing value.
+- Financial metrics: three rows as key-value (principal outstanding via `inr()`, DPD,
+  NPA stage, foreclosure flag).
+- **Fix** the overlap between the QA report and the timeline (the card with a fixed
+  height `540` missing a `px` unit): the timeline card must have its own scroll
+  container with `max-height: 480px; overflow: auto`.
+- Timeline items: channel badge, sentiment pill, date, title, summary clamped to 3 lines
+  with expand, flags line as small chips, cohort chips. Search and channel filter in a
+  toolbar. The cohort slide-out drawer is restyled with the `Drawer` shell.
+
+### 4.6 Collection insights: `CollectionInsights.jsx`
+Route `/collection-insights/:customerId`.
+```
+Collections · Call analysis
+┌ (MS) Mr. Name   [Home loan] [loan a/c] [dates]  address        ┌ 0/100 ┐ ┐
+│                                                                 │ low   │
+├─────────────────────────────────────────────────────────────────┴───────┘
+│ Ticket │ Call date │ PTP date │ Follow-up │ Owner                      (KeyValue tiles)
+[Overview] [Payment & Risk] [Promise to Pay] [Quality & Conduct] [Evidence]
+ Score snapshot (6 rings)                                  [How scoring works]
+ Conversation summary │ Cohort classification
+ Next best action
+ Why may pay │ Why may not pay
+ Business recommendation
+```
+- Header card: avatar, name, small chips (product, loan account), address muted. A
+  right-aligned "Overall action score" tile (big number /100 + priority label).
+- Five metadata tiles as one `KeyValueGrid` row.
+- The five tabs use the underline `Tabs` (keep existing state logic).
+- Score snapshot: six equal `ScoreRing`s (Payment Intent, Collection Risk, PTP Quality,
+  Compliance, Agent Process, Retention Risk) with label under and info icon; ring color
+  by the existing thresholds. Rings only render a number if a value exists.
+- Info cards in a two-column grid, using `KeyValueGrid`. Multi-line AI text is 14px,
+  left-aligned. Missing values show "Not available" in muted text, not an isolated "—".
+- Empty case: when the whole analysis is absent, show ONE `EmptyState` ("No collections
+  call analysed for this loan yet") instead of 20 empty cards. Do this only if the
+  existing code gives a reliable way to tell (e.g. no analysis object). Otherwise log it.
+- `ScoreInfoModal` and `TranscriptPanel` (transcript viewer + translation select) use the
+  `Modal`/`Drawer` shells; keep all their behavior.
+
+### 4.7 Email thread analytics: `ThreadAnalyticsDashboard.jsx`
+Route `/email-threads-analytics`.
+```
+Support operations intelligence                  [Last 30 days ▾] [Sync]
+[ Total volume ] [ Resolved ] [ Unresolved ] [ Resolution % ] [ Intent mix donut ]
+Thread directory  (2255 of 2255)        [Search…........] [All intents ▾]
+Customer │ Subject / summary │ Intent │ Resolution │ Messages │ Date
+```
+- Title row + range select + Sync (secondary button with refresh icon).
+- KPI strip: four `KpiTile`s (value 24px/600 tabular) with small icon and, for
+  "Unresolved", a warning accent; the intent donut sits in a fifth tile with a compact
+  legend (Query / Request / Complaint with counts). Colors: Query=info, Request=primary,
+  Complaint=danger, consistently everywhere.
+- Table: Customer (name 13px/600 + email muted), Subject (single line, bold) with the
+  summary beneath it in muted text, single line with tooltip, Intent (one `StatusPill`
+  + the secondary tag as muted text, never wrapping onto 2 lines), Resolution
+  (`StatusPill`), Messages (rename NOTHING; keep the existing header text, right-aligned
+  number), Date via `dateOnly()`. 44px rows; about 12 rows visible at 1366×768.
+- Row click opens the thread **Drawer** (right, 640px): header with subject (16px/600,
+  2-line clamp), date, close button; customer line (name · email · phone); chips for
+  intent, resolution and tone (e.g. Aggrieved); underline tabs (AI Analysis, Smart
+  Thread with count, Developer Data). Content: left-aligned cards with a small label and
+  14px text (Executive summary, Customer concern, ...). Keep the Developer Data tab,
+  styled in a monospace block with a copy button.
+
+### 4.8 Email dashboard: `EmailAnalysitcsDashboard.jsx`
+Route `/emails-dashboard`. (Check which header it currently uses. Do NOT change the
+header here without being told; note it in `CII_REDESIGN_NOTES.md`.)
+- Title row; KPI header as `KpiTile`s; a single filter toolbar (date range
+  today/yesterday/last 7/custom as `SegmentedControl`, sentiment, priority, customer
+  verification, search).
+- The tag-band matrix (Regulatory/Legal, Integrity, Grievance, Distress,
+  Dissatisfaction, Ops signals) shown as a compact row of selectable count chips with
+  semantic colors; the table below keeps 25-per-page pagination (restyle only).
+- Inline evidence expansion: a muted panel under the row with quotes as blockquote
+  styling (left 3px border), left-aligned.
+
+### 4.9 Customer email analysis: `EmailAnalysisPage.jsx`
+Route `/email-analysis/:customerId`.
+- Title row with the search bar and the Download button (secondary).
+- Customer email identity card: name, email, "Verified" pill, total threads / emails as
+  two small tiles.
+- Thread selector: horizontally scrollable pill row (selected = primary tint + border).
+- Detail: two columns. Left: classification badges (Query = info, Request = primary,
+  Complaint = danger), confidence, primary/secondary intents, intent flags (danger chips
+  for legal threat/distress), issue summary, company response analysis, complaint
+  severity. Right: balance-transfer/foreclosure risk, action-items checklist,
+  recommended next steps, email quality checks. All as `Card`s with `KeyValueGrid`.
+
+---
+
+## 5. Cross-page rules
+- The same entity looks the same everywhere: a customer name is 13-14px/600 in primary
+  color; money uses `inr()`; dates use `dateTime()/dateOnly()`; sentiment, priority,
+  channel and status use the shared pills/badges only.
+- Buttons: ONE style set (primary = navy filled, secondary = white with border,
+  ghost = text). Height 36px, radius 8px, 13px/500. Remove all one-off red/blue/green
+  buttons.
+- Remove duplicated per-page icon sets in the CII files; use `lucide-react`.
+- No inline `style={{}}` for static styling; use classes/tokens. Dynamic values (ring
+  percentages, bar widths) may use inline style.
+- Responsive: ≥1280 full layout, 1024-1279 rails collapse under content, <1024 single
+  column, tables scroll horizontally in their container.
+
+---
+
+## 6. Tasks (do ONE at a time, then STOP and report)
+
+**Task 1: Foundation + Header.** Create `src/cii/cii.css` (tokens + `.cii-app`
+scope), additive Tailwind `cii-*` tokens, all components in 3.6 under `src/cii/ui/`,
+`src/cii/format.js`, `src/cii/README.md`, and restyle `Header.jsx` per 4.1. Touch no
+page. *Done when:* build + lint pass, header renders on every CII page, no other page
+changed.
+
+**Task 2: Cohorts page** (4.2). **Task 3: Users page** (4.3). **Task 4: Loan details**
+(4.4). **Task 5: Customer insights** (4.5). **Task 6: Collection insights** (4.6).
+**Task 7: Email pages** (4.7, 4.8, 4.9).
+
+For every page task:
+1. First write an INVENTORY in your reply: every data field, every action
+   (button/link/filter/tab/export), every state (loading/error/empty), and the
+   hooks/handlers/API calls that must stay untouched.
+2. Implement the redesign with the `src/cii/ui` components, keeping logic as is.
+3. Output a PARITY TABLE (before vs after) showing every field and action still exists.
+4. Run `npm run lint` and `npm run build`; show `git diff --name-only`.
+5. List what you added to `CII_REDESIGN_NOTES.md`, then STOP.
+
+**Task 8: Final audit** (read-only). (1) `git diff --name-only main...HEAD` and list
+any file outside section 1's allowed list. (2) Run
+`git diff -U0 main...HEAD | grep -nE "fetch|axios|navigate\(|useEffect|useMemo|useCallback|useState|onClick=|href=|to=|XLSX"`
+and for each hit say whether it is a pure markup/class move or a logic change; there
+must be ZERO logic changes. (3) Confirm no changes in `src/pages/services`, `src/lib`,
+`src/ui`, `src/index.css`, `src/App.css`, `App.jsx`, `package.json`. (4) Print a
+per-page checklist: fields, actions, filters, tabs and exports preserved. (5) Print
+`CII_REDESIGN_NOTES.md`.
